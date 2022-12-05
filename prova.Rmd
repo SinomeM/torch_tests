@@ -47,7 +47,8 @@ crop_axes <- function(img) transform_crop(img, top = 0, left = 21,
                                           height = 131, width = 130)
 
 root <- file.path(tempdir(), "correlation")
-root <- "C:\\Users\\simone\\AppData\\Local\\Temp\\RtmpYTGhCW/correlation"
+root <- "/tmp/RtmpFC1vW1/correlation"
+# root <- "C:\\Users\\simone\\AppData\\Local\\Temp\\RtmpYTGhCW/correlation"
 
 # the three datasets, training, validation and testing
 train_ds <- guess_the_correlation_dataset(
@@ -161,5 +162,37 @@ fitted <- net %>%
     optimizer = optim_adam
   ) %>%
   fit(train_dl, epochs = 10, valid_data = test_dl)
+```
+
+### Evaluate performance on the test set
+```{r}
+preds <- predict(fitted, test_dl)
+
+# Visual representation of the result
+preds <- preds$to(device = "cpu")$squeeze() %>% as.numeric()
+test_dl <- dataloader(test_ds, batch_size = 5000)
+targets <- (test_dl %>% dataloader_make_iter() %>% dataloader_next())$y %>% as.numeric()
+
+df <- data.frame(preds = preds, targets = targets)
+
+library(ggplot2)
+
+ggplot(df, aes(x = targets, y = preds)) +
+  geom_point(size = 0.1) +
+  theme_classic() +
+  xlab("true correlations") +
+  ylab("model predictions")
+```
+
+This concludes the basic portion of the tutorial.
+
+
+## What if? 
+
+Some more advanced examples.
+
+### Different architectures for different kind of data
+```{r}
+
 ```
 
